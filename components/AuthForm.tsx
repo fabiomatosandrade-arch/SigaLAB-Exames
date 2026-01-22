@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { User } from '../types';
 
 interface AuthFormProps {
@@ -9,6 +9,7 @@ interface AuthFormProps {
 const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
   const [mode, setMode] = useState<'login' | 'register' | 'reset'>('login');
   const [showPassword, setShowPassword] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Registration state
   const [name, setName] = useState('');
@@ -18,7 +19,19 @@ const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
   const [conditions, setConditions] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [profilePicture, setProfilePicture] = useState<string>('');
   const [errors, setErrors] = useState<string[]>([]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePicture(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,23 +45,22 @@ const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
     }
 
     const newUser: User = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: Math.random().toString(36).substring(2, 11),
       name,
       birthDate,
       email,
       username,
       password,
-      preExistingConditions: conditions
+      preExistingConditions: conditions,
+      profilePicture: profilePicture
     };
 
-    // Auto-login
     onLogin(newUser);
   };
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, we would validate against a DB. 
-    // For this demo, we'll create a dummy user or check local storage.
+    // Simulação de login
     const dummyUser: User = {
       id: '123',
       name: 'Usuário Teste',
@@ -79,16 +91,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
             <form onSubmit={handleLoginSubmit} className="space-y-6">
               <h2 className="text-2xl font-bold text-slate-800">Entrar</h2>
               <div className="space-y-4">
-                <div className="relative">
-                  <input 
-                    type="text" 
-                    placeholder="Usuário" 
-                    required
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition" 
-                  />
-                </div>
+                <input 
+                  type="text" 
+                  placeholder="Usuário" 
+                  required
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition" 
+                />
                 <div className="relative">
                   <input 
                     type={showPassword ? "text" : "password"} 
@@ -111,12 +121,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
                   </button>
                 </div>
               </div>
-              <button 
-                type="submit" 
-                className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-indigo-700 transition shadow-lg shadow-indigo-100"
-              >
-                Acessar Sistema
-              </button>
+              <button type="submit" className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-indigo-700 transition shadow-lg">Acessar Sistema</button>
               <div className="flex justify-between text-sm">
                 <button type="button" onClick={() => setMode('reset')} className="text-indigo-600 hover:underline">Esqueci minha senha</button>
                 <button type="button" onClick={() => setMode('register')} className="text-slate-600 hover:underline">Criar conta</button>
@@ -125,61 +130,42 @@ const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
           )}
 
           {mode === 'register' && (
-            <form onSubmit={handleRegister} className="space-y-4">
+            <form onSubmit={handleRegister} className="space-y-4 max-h-[70vh] overflow-y-auto px-1">
               <h2 className="text-2xl font-bold text-slate-800">Nova Conta</h2>
+              
+              {/* Profile Photo Upload */}
+              <div className="flex flex-col items-center gap-3 py-4">
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-24 h-24 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer overflow-hidden hover:border-indigo-400 transition group"
+                >
+                  {profilePicture ? (
+                    <img src={profilePicture} className="w-full h-full object-cover" alt="Preview" />
+                  ) : (
+                    <div className="text-center p-2">
+                      <svg className="w-8 h-8 text-slate-400 mx-auto group-hover:text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase group-hover:text-indigo-500">Foto</span>
+                    </div>
+                  )}
+                </div>
+                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
+              </div>
+
               {errors.length > 0 && (
                 <div className="p-3 bg-red-50 text-red-600 rounded-lg text-sm">
                   {errors.map((err, i) => <p key={i}>{err}</p>)}
                 </div>
               )}
-              <input 
-                type="text" 
-                placeholder="Nome Completo" 
-                required 
-                value={name}
-                onChange={e => setName(e.target.value)}
-                className="w-full p-3 bg-slate-50 border rounded-xl outline-none" 
-              />
+
+              <input type="text" placeholder="Nome Completo" required value={name} onChange={e => setName(e.target.value)} className="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500" />
               <div className="flex gap-4">
-                <input 
-                  type="date" 
-                  placeholder="Data Nasc." 
-                  required 
-                  value={birthDate}
-                  onChange={e => setBirthDate(e.target.value)}
-                  className="flex-1 p-3 bg-slate-50 border rounded-xl outline-none" 
-                />
-                <input 
-                  type="text" 
-                  placeholder="Usuário" 
-                  required 
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  className="flex-1 p-3 bg-slate-50 border rounded-xl outline-none" 
-                />
+                <input type="date" required value={birthDate} onChange={e => setBirthDate(e.target.value)} className="flex-1 p-3 bg-slate-50 border rounded-xl outline-none" />
+                <input type="text" placeholder="Usuário" required value={username} onChange={e => setUsername(e.target.value)} className="flex-1 p-3 bg-slate-50 border rounded-xl outline-none" />
               </div>
-              <input 
-                type="email" 
-                placeholder="E-mail" 
-                required 
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="w-full p-3 bg-slate-50 border rounded-xl outline-none" 
-              />
-              <input 
-                type="email" 
-                placeholder="Confirme o E-mail" 
-                required 
-                value={emailConfirm}
-                onChange={e => setEmailConfirm(e.target.value)}
-                className="w-full p-3 bg-slate-50 border rounded-xl outline-none" 
-              />
-              <textarea 
-                placeholder="Doenças Preexistentes" 
-                value={conditions}
-                onChange={e => setConditions(e.target.value)}
-                className="w-full p-3 bg-slate-50 border rounded-xl outline-none h-20 resize-none"
-              ></textarea>
+              <input type="email" placeholder="E-mail" required value={email} onChange={e => setEmail(e.target.value)} className="w-full p-3 bg-slate-50 border rounded-xl outline-none" />
+              <input type="email" placeholder="Confirme o E-mail" required value={emailConfirm} onChange={e => setEmailConfirm(e.target.value)} className="w-full p-3 bg-slate-50 border rounded-xl outline-none" />
+              <textarea placeholder="Doenças Preexistentes" value={conditions} onChange={e => setConditions(e.target.value)} className="w-full p-3 bg-slate-50 border rounded-xl outline-none h-20 resize-none"></textarea>
+              
               <div className="relative">
                 <input 
                   type={showPassword ? "text" : "password"} 
@@ -187,22 +173,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
                   required 
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full p-3 bg-slate-50 border rounded-xl outline-none pr-10" 
+                  className="w-full p-3 bg-slate-50 border rounded-xl outline-none pr-10 focus:ring-2 focus:ring-indigo-500" 
                 />
-                <button 
-                  type="button" 
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-slate-400"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-slate-400">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                 </button>
               </div>
-              <button 
-                type="submit" 
-                className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition"
-              >
-                Cadastrar
-              </button>
+
+              <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition">Cadastrar</button>
               <button type="button" onClick={() => setMode('login')} className="w-full text-center text-slate-500 hover:underline">Já tenho conta</button>
             </form>
           )}
@@ -211,20 +189,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
             <form onSubmit={handleReset} className="space-y-6">
               <h2 className="text-2xl font-bold text-slate-800">Recuperar Senha</h2>
               <p className="text-slate-500">Informe seu e-mail para receber um link de redefinição.</p>
-              <input 
-                type="email" 
-                placeholder="E-mail cadastrado" 
-                required 
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="w-full p-4 bg-slate-50 border rounded-2xl outline-none" 
-              />
-              <button 
-                type="submit" 
-                className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold"
-              >
-                Enviar Link
-              </button>
+              <input type="email" placeholder="E-mail cadastrado" required value={email} onChange={e => setEmail(e.target.value)} className="w-full p-4 bg-slate-50 border rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" />
+              <button type="submit" className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold">Enviar Link</button>
               <button type="button" onClick={() => setMode('login')} className="w-full text-center text-slate-500 hover:underline">Voltar</button>
             </form>
           )}

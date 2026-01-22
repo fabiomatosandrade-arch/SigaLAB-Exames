@@ -21,13 +21,11 @@
         }
     </style>
     <script>
-      // Polyfill seguro: garante que process.env existe sem apagar o que já foi injetado (como API_KEY)
       window.global = window;
       if (!window.process) window.process = { env: {} };
       if (!window.process.env) window.process.env = {};
       window.process.env.NODE_ENV = 'production';
 
-      // Captura e exibe erros críticos na tela para facilitar o diagnóstico
       window.addEventListener('error', function(e) {
         console.error('Erro detectado no SigaLab:', e);
         const root = document.getElementById('root');
@@ -35,12 +33,9 @@
           root.innerHTML = `
             <div style="padding: 40px; font-family: sans-serif; text-align: center; color: #334155; max-width: 600px; margin: 0 auto;">
               <h2 style="color: #ef4444;">Falha no Carregamento</h2>
-              <p style="margin: 20px 0;">O aplicativo não pôde ser iniciado devido a um erro de script ou conexão.</p>
-              <div style="background: #f8fafc; padding: 15px; border-radius: 12px; font-size: 13px; text-align: left; overflow: auto; border: 1px solid #e2e8f0; font-family: monospace;">
-                ${e.message || 'Erro de rede ou módulo externo'}
-              </div>
+              <p style="margin: 20px 0;">O aplicativo não pôde ser iniciado. Verifique sua conexão.</p>
               <button onclick="location.reload()" style="margin-top: 24px; padding: 12px 24px; background: #6366f1; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold;">
-                Tentar Novamente
+                Recarregar Página
               </button>
             </div>
           `;
