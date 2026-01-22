@@ -22,19 +22,24 @@
     </style>
     <script>
       // Polyfill imediato para o SDK do Gemini
-      window.process = { env: {} };
+      window.process = { env: { NODE_ENV: 'production' } };
       
       // Captura erros de carregamento de módulo e erros de execução
       window.addEventListener('error', function(e) {
-        console.error('Erro detectado:', e.message);
+        console.error('Erro detectado no SigaLab:', e);
         const root = document.getElementById('root');
         if (root && root.innerHTML === '') {
           root.innerHTML = `
-            <div style="padding: 40px; font-family: sans-serif; text-align: center; color: #334155;">
-              <h2 style="color: #ef4444;">Não foi possível carregar o SigaLab</h2>
-              <p style="margin: 20px 0;">Isso pode ser um problema de conexão ou compatibilidade do navegador.</p>
-              <pre style="background: #f1f5f9; padding: 15px; border-radius: 8px; font-size: 12px; text-align: left; overflow: auto; max-width: 500px; margin: 0 auto;">${e.message || 'Erro de rede ou módulo'}</pre>
-              <button onclick="location.reload()" style="margin-top: 20px; padding: 12px 24px; background: #6366f1; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold;">Tentar Novamente</button>
+            <div style="padding: 40px; font-family: sans-serif; text-align: center; color: #334155; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #ef4444;">Erro de Inicialização</h2>
+              <p style="margin: 20px 0;">O aplicativo não pôde ser carregado. Verifique sua conexão com a internet.</p>
+              <div style="background: #f1f5f9; padding: 15px; border-radius: 12px; font-size: 13px; text-align: left; overflow: auto; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+                <strong>Detalhe técnico:</strong><br>
+                ${e.message || 'Falha ao carregar módulos do sistema (CDN)'}
+              </div>
+              <button onclick="location.reload()" style="padding: 12px 24px; background: #6366f1; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);">
+                Tentar Novamente
+              </button>
             </div>
           `;
         }
@@ -46,7 +51,7 @@
     "react": "https://esm.sh/react@19.0.0",
     "react-dom": "https://esm.sh/react-dom@19.0.0",
     "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-    "recharts": "https://esm.sh/recharts@2.15.0",
+    "recharts": "https://esm.sh/recharts@2.15.0?deps=react@19.0.0,react-dom@19.0.0",
     "@google/genai": "https://esm.sh/@google/genai@1.38.0",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/"
