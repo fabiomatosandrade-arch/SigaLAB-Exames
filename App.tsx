@@ -17,6 +17,7 @@ const App: React.FC = () => {
   // Carregamento inicial resiliente
   useEffect(() => {
     const hydrate = () => {
+      console.log('App: Iniciando hidratação de dados...');
       try {
         const savedUser = localStorage.getItem('sigalab_user');
         const savedExams = localStorage.getItem('sigalab_exams');
@@ -25,6 +26,7 @@ const App: React.FC = () => {
           const parsedUser = JSON.parse(savedUser);
           if (parsedUser && typeof parsedUser === 'object') {
             setUser(parsedUser);
+            console.log('App: Usuário recuperado.');
           }
         }
         
@@ -32,24 +34,25 @@ const App: React.FC = () => {
           const parsedExams = JSON.parse(savedExams);
           if (Array.isArray(parsedExams)) {
             setExams(parsedExams);
+            console.log('App: Exames recuperados:', parsedExams.length);
           }
         }
       } catch (error) {
-        console.warn("Aviso: LocalStorage indisponível ou dados corrompidos.", error);
+        console.warn("App: LocalStorage indisponível.", error);
       } finally {
         setIsReady(true);
+        console.log('App: Pronto para renderizar.');
       }
     };
 
-    // Pequeno delay para garantir que o DOM e os scripts estejam estáveis
-    const timer = setTimeout(hydrate, 100);
+    // Pequeno delay para garantir estabilidade do DOM
+    const timer = setTimeout(hydrate, 50);
     return () => clearTimeout(timer);
   }, []);
 
-  // Persistência automática apenas após estar pronto
+  // Persistência automática
   useEffect(() => {
     if (!isReady) return;
-    
     try {
       if (user) {
         localStorage.setItem('sigalab_user', JSON.stringify(user));
@@ -58,7 +61,7 @@ const App: React.FC = () => {
       }
       localStorage.setItem('sigalab_exams', JSON.stringify(exams));
     } catch (error) {
-      console.warn("Aviso: Falha ao salvar no LocalStorage.", error);
+      console.warn("App: Falha ao salvar dados.", error);
     }
   }, [user, exams, isReady]);
 
@@ -67,9 +70,7 @@ const App: React.FC = () => {
   const handleLogout = () => {
     setUser(null);
     setCurrentPage('dashboard');
-    try {
-      localStorage.removeItem('sigalab_user');
-    } catch (e) {}
+    try { localStorage.removeItem('sigalab_user'); } catch (e) {}
   };
 
   const addExam = (examData: Omit<LabExam, 'id' | 'userId'>) => {
@@ -91,7 +92,7 @@ const App: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-slate-500 font-medium">Iniciando SigaLab...</p>
+          <p className="text-slate-500 font-medium">Sincronizando registros...</p>
         </div>
       </div>
     );

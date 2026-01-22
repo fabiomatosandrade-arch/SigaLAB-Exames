@@ -10,7 +10,7 @@
     <style>
         body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
         #root:empty::before {
-            content: 'Carregando SigaLab...';
+            content: 'Iniciando SigaLab...';
             display: flex;
             justify-content: center;
             align-items: center;
@@ -21,29 +21,31 @@
         }
     </style>
     <script>
-      // Polyfill imediato para o SDK do Gemini
-      window.process = { env: { NODE_ENV: 'production' } };
-      
-      // Captura erros de carregamento de módulo e erros de execução
+      // Polyfill seguro: garante que process.env existe sem apagar o que já foi injetado (como API_KEY)
+      window.global = window;
+      if (!window.process) window.process = { env: {} };
+      if (!window.process.env) window.process.env = {};
+      window.process.env.NODE_ENV = 'production';
+
+      // Captura e exibe erros críticos na tela para facilitar o diagnóstico
       window.addEventListener('error', function(e) {
         console.error('Erro detectado no SigaLab:', e);
         const root = document.getElementById('root');
         if (root && root.innerHTML === '') {
           root.innerHTML = `
             <div style="padding: 40px; font-family: sans-serif; text-align: center; color: #334155; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #ef4444;">Erro de Inicialização</h2>
-              <p style="margin: 20px 0;">O aplicativo não pôde ser carregado. Verifique sua conexão com a internet.</p>
-              <div style="background: #f1f5f9; padding: 15px; border-radius: 12px; font-size: 13px; text-align: left; overflow: auto; border: 1px solid #e2e8f0; margin-bottom: 20px;">
-                <strong>Detalhe técnico:</strong><br>
-                ${e.message || 'Falha ao carregar módulos do sistema (CDN)'}
+              <h2 style="color: #ef4444;">Falha no Carregamento</h2>
+              <p style="margin: 20px 0;">O aplicativo não pôde ser iniciado devido a um erro de script ou conexão.</p>
+              <div style="background: #f8fafc; padding: 15px; border-radius: 12px; font-size: 13px; text-align: left; overflow: auto; border: 1px solid #e2e8f0; font-family: monospace;">
+                ${e.message || 'Erro de rede ou módulo externo'}
               </div>
-              <button onclick="location.reload()" style="padding: 12px 24px; background: #6366f1; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);">
+              <button onclick="location.reload()" style="margin-top: 24px; padding: 12px 24px; background: #6366f1; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold;">
                 Tentar Novamente
               </button>
             </div>
           `;
         }
-      }, true);
+      });
     </script>
 <script type="importmap">
 {
@@ -51,7 +53,7 @@
     "react": "https://esm.sh/react@19.0.0",
     "react-dom": "https://esm.sh/react-dom@19.0.0",
     "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-    "recharts": "https://esm.sh/recharts@2.15.0?deps=react@19.0.0,react-dom@19.0.0",
+    "recharts": "https://esm.sh/recharts@2.15.0?external=react,react-dom",
     "@google/genai": "https://esm.sh/@google/genai@1.38.0",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/"
