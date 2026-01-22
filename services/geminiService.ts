@@ -2,13 +2,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { SigtapProcedure } from "../types";
 
-// Always use process.env.API_KEY directly when initializing as per guidelines
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 export const searchSigtapExams = async (query: string): Promise<SigtapProcedure[]> => {
   if (!query || query.length < 2) return [];
 
   try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Liste exames laboratoriais da tabela SIGTAP que correspondam a "${query}". 
@@ -40,6 +38,7 @@ export const searchSigtapExams = async (query: string): Promise<SigtapProcedure[
 
 export const analyzeHealthEvolution = async (exams: any[], conditions: string) => {
   try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: `Analise o histórico de exames: ${JSON.stringify(exams)}. 
@@ -48,6 +47,7 @@ export const analyzeHealthEvolution = async (exams: any[], conditions: string) =
     });
     return response.text;
   } catch (error) {
+    console.error("Erro na análise clínica:", error);
     return "Não foi possível gerar a análise clínica automática no momento.";
   }
 };
