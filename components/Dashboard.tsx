@@ -9,25 +9,25 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ exams }) => {
   const chartData = useMemo(() => {
-    // Group exams by type to show evolution
+    if (!exams || exams.length === 0) return [];
+
+    // Agrupa exames por nome
     const grouped = exams.reduce((acc, exam) => {
       if (!acc[exam.examName]) acc[exam.examName] = [];
       acc[exam.examName].push(exam);
       return acc;
     }, {} as Record<string, LabExam[]>);
 
-    // Get the most frequent exam for initial display or all
-    // Fix: Explicitly cast entries to avoid 'unknown' type error on value access (b[1].length)
-    const entries = Object.entries(grouped) as [string, LabExam[]][];
-    const mostFrequent = entries
-      .sort((a, b) => b[1].length - a[1].length)[0]?.[0];
+    // Encontra o exame mais frequente
+    const sortedNames = Object.keys(grouped).sort((a, b) => grouped[b].length - grouped[a].length);
+    const mostFrequent = sortedNames[0];
 
     if (!mostFrequent) return [];
 
     return grouped[mostFrequent]
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .map(e => ({
-        date: new Date(e.date).toLocaleDateString('pt-BR'),
+        date: new Date(e.date + "T00:00:00").toLocaleDateString('pt-BR'),
         valor: e.value,
         nome: e.examName
       }));
@@ -47,15 +47,17 @@ const Dashboard: React.FC<DashboardProps> = ({ exams }) => {
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <p className="text-sm font-medium text-slate-500 mb-1">Último Exame</p>
-          <p className="text-xl font-bold text-slate-800">
+          <p className="text-xl font-bold text-slate-800 truncate">
             {exams.length > 0 ? exams[exams.length - 1].examName : 'Nenhum'}
           </p>
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <p className="text-sm font-medium text-slate-500 mb-1">Status Geral</p>
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-            <p className="text-lg font-semibold text-slate-800 italic">Atualizado</p>
+            <span className={`w-3 h-3 rounded-full ${exams.length > 0 ? 'bg-green-500' : 'bg-slate-300'}`}></span>
+            <p className="text-lg font-semibold text-slate-800">
+              {exams.length > 0 ? 'Atualizado' : 'Aguardando dados'}
+            </p>
           </div>
         </div>
       </div>
@@ -85,7 +87,7 @@ const Dashboard: React.FC<DashboardProps> = ({ exams }) => {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full flex items-center justify-center text-slate-400 italic">
+            <div className="h-full flex items-center justify-center text-slate-400 italic bg-slate-50 border border-dashed border-slate-200 rounded-xl">
               Adicione exames para visualizar o gráfico de evolução.
             </div>
           )}

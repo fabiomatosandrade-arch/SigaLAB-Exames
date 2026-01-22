@@ -8,22 +8,53 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
+        #root:empty::before {
+            content: 'Carregando SigaLab...';
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #6366f1;
+            font-weight: 600;
+            font-family: sans-serif;
+        }
     </style>
+    <script>
+      // Polyfill imediato para o SDK do Gemini
+      window.process = { env: {} };
+      
+      // Captura erros de carregamento de módulo e erros de execução
+      window.addEventListener('error', function(e) {
+        console.error('Erro detectado:', e.message);
+        const root = document.getElementById('root');
+        if (root && root.innerHTML === '') {
+          root.innerHTML = `
+            <div style="padding: 40px; font-family: sans-serif; text-align: center; color: #334155;">
+              <h2 style="color: #ef4444;">Não foi possível carregar o SigaLab</h2>
+              <p style="margin: 20px 0;">Isso pode ser um problema de conexão ou compatibilidade do navegador.</p>
+              <pre style="background: #f1f5f9; padding: 15px; border-radius: 8px; font-size: 12px; text-align: left; overflow: auto; max-width: 500px; margin: 0 auto;">${e.message || 'Erro de rede ou módulo'}</pre>
+              <button onclick="location.reload()" style="margin-top: 20px; padding: 12px 24px; background: #6366f1; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold;">Tentar Novamente</button>
+            </div>
+          `;
+        }
+      }, true);
+    </script>
 <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@19.0.0",
-    "react/": "https://esm.sh/react@19.0.0/",
     "react-dom": "https://esm.sh/react-dom@19.0.0",
-    "react-dom/": "https://esm.sh/react-dom@19.0.0/",
-    "recharts": "https://esm.sh/recharts@3.0.0",
-    "@google/genai": "https://esm.sh/@google/genai@1.38.0"
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "recharts": "https://esm.sh/recharts@2.15.0",
+    "@google/genai": "https://esm.sh/@google/genai@1.38.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body>
     <div id="root"></div>
     <script type="module" src="./index.tsx"></script>
 </body>

@@ -16,27 +16,34 @@ const App: React.FC = () => {
 
   // Carregamento inicial resiliente
   useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem('sigalab_user');
-      const savedExams = localStorage.getItem('sigalab_exams');
-      
-      if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
-        setUser(JSON.parse(savedUser));
-      }
-      
-      if (savedExams && savedExams !== 'undefined' && savedExams !== 'null') {
-        const parsedExams = JSON.parse(savedExams);
-        if (Array.isArray(parsedExams)) {
-          setExams(parsedExams);
+    const hydrate = () => {
+      try {
+        const savedUser = localStorage.getItem('sigalab_user');
+        const savedExams = localStorage.getItem('sigalab_exams');
+        
+        if (savedUser && savedUser !== 'undefined' && savedUser !== 'null') {
+          const parsedUser = JSON.parse(savedUser);
+          if (parsedUser && typeof parsedUser === 'object') {
+            setUser(parsedUser);
+          }
         }
+        
+        if (savedExams && savedExams !== 'undefined' && savedExams !== 'null') {
+          const parsedExams = JSON.parse(savedExams);
+          if (Array.isArray(parsedExams)) {
+            setExams(parsedExams);
+          }
+        }
+      } catch (error) {
+        console.warn("Aviso: LocalStorage indisponível ou dados corrompidos.", error);
+      } finally {
+        setIsReady(true);
       }
-    } catch (error) {
-      console.error("Erro ao carregar dados salvos:", error);
-      // Opcional: Limpar dados se estiverem corrompidos para permitir novo login
-      // localStorage.clear();
-    } finally {
-      setIsReady(true);
-    }
+    };
+
+    // Pequeno delay para garantir que o DOM e os scripts estejam estáveis
+    const timer = setTimeout(hydrate, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   // Persistência automática apenas após estar pronto
@@ -51,7 +58,7 @@ const App: React.FC = () => {
       }
       localStorage.setItem('sigalab_exams', JSON.stringify(exams));
     } catch (error) {
-      console.error("Erro ao salvar dados localmente:", error);
+      console.warn("Aviso: Falha ao salvar no LocalStorage.", error);
     }
   }, [user, exams, isReady]);
 
@@ -60,8 +67,9 @@ const App: React.FC = () => {
   const handleLogout = () => {
     setUser(null);
     setCurrentPage('dashboard');
-    // Limpeza explícita para evitar problemas em próximo acesso
-    localStorage.removeItem('sigalab_user');
+    try {
+      localStorage.removeItem('sigalab_user');
+    } catch (e) {}
   };
 
   const addExam = (examData: Omit<LabExam, 'id' | 'userId'>) => {
