@@ -1,9 +1,10 @@
 
 import React from 'react';
+import { User } from '../types';
 
 interface LayoutProps {
   children: React.ReactNode;
-  user: any;
+  user: User;
   onLogout: () => void;
   onNavigate: (page: string) => void;
   currentPage: string;
@@ -13,7 +14,7 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, onNavigate, c
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-indigo-900 text-white p-6 shrink-0">
+      <aside className="w-full md:w-64 bg-indigo-900 text-white p-6 shrink-0 flex flex-col">
         <div className="flex items-center gap-2 mb-10">
           <div className="bg-white p-2 rounded-lg">
              <svg className="w-6 h-6 text-indigo-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
@@ -21,7 +22,7 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, onNavigate, c
           <h1 className="text-xl font-bold">SigaLab</h1>
         </div>
 
-        <nav className="space-y-2">
+        <nav className="space-y-2 flex-1">
           <button 
             onClick={() => onNavigate('dashboard')}
             className={`w-full text-left px-4 py-3 rounded-lg transition ${currentPage === 'dashboard' ? 'bg-indigo-700 shadow-lg' : 'hover:bg-indigo-800'}`}
@@ -48,16 +49,25 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout, onNavigate, c
           </button>
         </nav>
 
-        <div className="mt-auto pt-10 border-t border-indigo-800">
-          <div className="mb-4">
-            <p className="text-xs text-indigo-300 uppercase tracking-wider font-semibold">Usuário</p>
-            <p className="font-medium truncate">{user.name}</p>
+        <div className="mt-auto pt-6 border-t border-indigo-800">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-full bg-indigo-700 border border-indigo-600 flex items-center justify-center overflow-hidden shrink-0">
+              {user.profilePicture ? (
+                <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                <svg className="w-6 h-6 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+              )}
+            </div>
+            <div className="truncate">
+              <p className="text-xs text-indigo-300 uppercase tracking-wider font-semibold">Usuário</p>
+              <p className="font-medium truncate text-sm">{user.name}</p>
+            </div>
           </div>
           <button 
             onClick={onLogout}
-            className="w-full text-left px-4 py-2 text-indigo-200 hover:text-white transition flex items-center gap-2"
+            className="w-full text-left px-4 py-2 text-indigo-200 hover:text-white transition flex items-center gap-2 text-sm"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
             Sair
           </button>
         </div>

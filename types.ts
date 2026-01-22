@@ -7,6 +7,7 @@ export interface User {
   username: string;
   password?: string;
   preExistingConditions: string;
+  profilePicture?: string; // Campo para imagem em base64
 }
 
 export interface SigtapProcedure {

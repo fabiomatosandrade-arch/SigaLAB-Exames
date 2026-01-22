@@ -45,7 +45,6 @@ const App: React.FC = () => {
       }
     };
 
-    // Pequeno delay para garantir estabilidade do DOM
     const timer = setTimeout(hydrate, 50);
     return () => clearTimeout(timer);
   }, []);
@@ -71,6 +70,10 @@ const App: React.FC = () => {
     setUser(null);
     setCurrentPage('dashboard');
     try { localStorage.removeItem('sigalab_user'); } catch (e) {}
+  };
+
+  const handleUpdateUser = (updatedUser: User) => {
+    setUser(updatedUser);
   };
 
   const addExam = (examData: Omit<LabExam, 'id' | 'userId'>) => {
@@ -107,7 +110,7 @@ const App: React.FC = () => {
       case 'dashboard': return <Dashboard exams={exams} />;
       case 'exams': return <ExamList exams={exams} onAddExam={addExam} onDeleteExam={deleteExam} />;
       case 'reports': return <Reports exams={exams} user={user} />;
-      case 'profile': return <Profile user={user} />;
+      case 'profile': return <Profile user={user} onUpdateUser={handleUpdateUser} />;
       default: return <Dashboard exams={exams} />;
     }
   };
